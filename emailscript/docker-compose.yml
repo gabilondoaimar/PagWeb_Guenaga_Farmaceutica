@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  smtp4dev:
+    image: rnwood/smtp4dev:latest
+    container_name: smtp4dev
+    ports:
+      - "25:25"    # Puerto SMTP
+      - "5000:80"  # Interfaz web
+    restart: always
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql-container
+    environment:
+      MYSQL_DATABASE: bdweb
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3308:3306"  # Puerto para conexión a la base de datos
+    restart: always

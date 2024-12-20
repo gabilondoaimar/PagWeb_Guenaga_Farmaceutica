@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_container
+    environment:
+      MYSQL_DATABASE: bdweb
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    volumes:
+      - ./volumenes/mysql:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      custom_network:
+        ipv4_address: 192.168.31.101
+    restart: always
+
+  web:
+    container_name: web_container
+    build: .
+    ports:
+      - "443:443"
+      - "80:80"
+    environment:
+      - VIRTUAL_HOST=farmazia.guenaga.lan
+    networks:
+      custom_network:
+        ipv4_address: 192.168.31.100
+    volumes:
+      - ./web:/var/www/html
+      - ./ssl/cert:/etc/ssl/certs/
+      - ./ssl/private:/etc/ssl/private/
+      - apache_config:/etc/apache2
+    depends_on:
+      - db
+    entrypoint: >
+      /bin/bash -c "
+      if [ ! -f /etc/apache2/apache2.conf ]; then
+        cp -r /etc/apache2-default/* /etc/apache2/;
+      fi &&
+      apache2-foreground"
+    restart: always
+volumes:
+  apache_config:
+
+networks:
+  custom_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.31.0/24
+          gateway: 192.168.31.254
+      
